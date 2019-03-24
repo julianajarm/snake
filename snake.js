@@ -40,12 +40,12 @@ let snake = {
         this.body = [startPoint];
         this.direction = direction;
     },
+
     makeStep() {
         this.lastStepDirection = this.direction;
         this.body.unshift(this.getNextStepHeadPoint());
         this.body.pop();
     },
-    
 
     getNextStepHeadPoint() {
         let firstPoint = this.body[0];
@@ -94,33 +94,44 @@ let snake = {
 let food = {
     x: null,
     y: null,
+    score: 0,
+    color: null,
+    lifetime: 0,
 
-    setFoodCoordinates(point) {
+    generate(point, variants) {
+        this.setCoordinates(point);
+        let config = variants[Math.floor(Math.random()*variants.length)];
+        this.score = config.score;
+        this.color = config.color;
+        this.lifetime = config.lifetime;
+    },
+
+    setCoordinates(point) {
         this.x = point.x;
         this.y = point.y;
     },
 
-    getFoodCoordinates() {
+    getCoordinates() {
         return {
             x: this.x,
             y: this.y
         }
     },
 
-    isFoodPoint(point) {
+    isThere(point) {
         return this.x === point.x && this.y === point.y;
     }
 };
 
 let renderer = {
     cells: {}, // в нем лежат все ячейки {x0_y0}, они переданы объектами
-    
-    renderCounter(count) {
+
+    renderScore(scoreManager) {
         let counterPlace = document.getElementById('counter');
-        counterPlace.innerHTML = `<p>Счёт: ${count} </p>`;//интерполяция строки
+        counterPlace.innerHTML = `<p>Счёт: ${scoreManager.getTotal()} </p>`;//интерполяция строки
     },
 
-    renderMap(rowsCount, colsCount) {
+    renderInitMap(rowsCount, colsCount) {
         let table = document.getElementById('game');
         table.innerHTML = '';
 
@@ -137,18 +148,19 @@ let renderer = {
             }
         }
     },
-    
 
-    render(snakePointArray, foodPoint) {
+
+    render(snakePointArray, food) {
         for (let key of Object.getOwnPropertyNames(this.cells)) {
             this.cells[key].className = 'cell';
+            this.cells[key].innerHTML = '';
         }
 
         snakePointArray.forEach((point, idx) => {
             this.cells[`x${point.x}_y${point.y}`].classList.add(idx === 0 ? 'snakeHead' : 'snakeBody');
         });
 
-        this.cells[`x${foodPoint.x}_y${foodPoint.y}`].classList.add('food');
+        this.cells[`x${food.x}_y${food.y}`].insertAdjacentHTML("afterbegin", `<div class='food' style='background-color: ${food.color}'></div>`);
     }
 
 };
@@ -178,7 +190,12 @@ let settings = {
     rowsCount: 21,
     colsCount: 21,
     speed: 2,
-    winLength: 10, //какой длины должна быть змейка для победы 
+    winScore: 10, //какой длины должна быть змейка для победы
+    foodVariants: [
+        {score: 1, color: 'green', lifetime: 5000},
+        {score: 2, color: 'blue', lifetime: 4000},
+        {score: 3, color: 'orange', lifetime: 3000},
+    ],
 
 
     validate() {
@@ -197,13 +214,29 @@ let settings = {
             return false;
         }
 
-        if (this.winLength < 5 || this.winLength > 50) {
-            console.error('Неверные настройки, значение winLength должно быть в диапазоне [5, 50].');
+        if (this.winScore < 5 || this.winScore > 50) {
+            console.error('Неверные настройки, значение winScore должно быть в диапазоне [5, 50].');
             return false;
         }
 
         return true;
     },
+};
+
+let scoreManager = {
+    counter: 0,
+
+    increment(count) {
+        this.counter += count;
+    },
+
+    getTotal() {
+        return this.counter;
+    },
+
+    reset() {
+        this.counter = 0;
+    }
 };
 
 let game = {
@@ -212,7 +245,9 @@ let game = {
     renderer,
     food,
     snake,
+    scoreManager,
     tickInterval: null,
+    foodRegenerateTimeout: null,
 
     init(userSettings = {}) {
         Object.assign(this.settings, userSettings); //если в userSettings ничего не будет, он будет пустой, то ничего не произойдет, но если передать скорость 5, она обновится и в массиве сеттингс
@@ -221,7 +256,7 @@ let game = {
             return;
         }
 
-        this.renderer.renderMap(this.settings.rowsCount, this.settings.colsCount);
+        this.renderer.renderInitMap(this.settings.rowsCount, this.settings.colsCount);
 
         this.setEventHandlers();
 
@@ -283,15 +318,15 @@ let game = {
                 return '';
         }
     },
-    
+
     reset() {
         this.snake.init(this.getStartSnakePoint(), 'up');
-
-        this.food.setFoodCoordinates(this.getRandomCoordinates());
-
-        this.renderer.render(this.snake.body, this.food.getFoodCoordinates());
+        this.food.generate(this.getRandomCoordinates(), this.settings.foodVariants);
+        this.renderer.render(this.snake.body, this.food);
+        this.scoreManager.reset();
+        this.renderer.renderScore(this.scoreManager);
     },
-    
+
     play() {
         this.status.setPlaying();
 
@@ -306,27 +341,23 @@ let game = {
             return;
         }
 
-        if (this.food.isFoodPoint(this.snake.getNextStepHeadPoint())) {
-            this.snake.incrementBody();
-            this.food.setFoodCoordinates(this.getRandomCoordinates());
-            this.renderer.renderCounter(this.snake.body.length-1);
-            if(this.isGameWon()) {
-                this.finish();
-            }
+        if (this.food.isThere(this.snake.getNextStepHeadPoint())) {
+            this.snakeEats();
         }
 
         this.snake.makeStep();
-        this.renderer.render(this.snake.body, this.food.getFoodCoordinates());
+        this.renderer.render(this.snake.body, this.food);
     },
-    
+
     isGameWon() {
-        return this.snake.body.length > this.settings.winLength;
+        return this.scoreManager.getTotal() > this.settings.winScore;
     },
 
     stop() {
 
         this.status.setStopped();
         clearInterval(this.tickInterval);
+        clearTimeout(this.foodRegenerateTimeout);
         this.changePlayButton('Старт');
     },
 
@@ -344,7 +375,7 @@ let game = {
     },
 
     getRandomCoordinates() {
-        let exclude = [this.food.getFoodCoordinates(), ...this.snake.body];
+        let exclude = [this.food.getCoordinates(), ...this.snake.body];
 
         while (true) {
             let rndPoint = {
@@ -361,11 +392,13 @@ let game = {
             }
         }
     },
+
     changePlayButton(textContent, isDisabled = false) {
         let playButton = document.getElementById('playButton');
         playButton.textContent = textContent;
         isDisabled ? playButton.classList.add('disabled') : playButton.classList.remove('disabled');
     },
+
     canSnakeMakeStep() {
         let nextHeadPoint = this.snake.getNextStepHeadPoint();
 
@@ -374,12 +407,29 @@ let game = {
             nextHeadPoint.y < this.settings.rowsCount &&
             nextHeadPoint.x >= 0 &&
             nextHeadPoint.y >= 0;
-    }
+    },
+
+    snakeEats: function () {
+        this.snake.incrementBody();
+        this.scoreManager.increment(this.food.score);
+        clearTimeout(this.foodRegenerateTimeout);
+        this.foodRegenerate();
+        this.renderer.renderScore(this.scoreManager);
+        if (this.isGameWon()) {
+            this.finish();
+        };
+    },
+
+    foodRegenerate(){
+        this.food.generate(this.getRandomCoordinates(), this.settings.foodVariants);
+        this.renderer.render(this.snake.body, this.food);
+        this.foodRegenerateTimeout = setTimeout( () => this.foodRegenerate(), this.food.lifetime);
+    },
 };
 
 window.onload = function () {
     game.init({
         speed: 5,
-        winLength: 10,
+        winScore: 10,
     });
 };

@@ -43,8 +43,19 @@ td.cell {
 }
 
 .food {
-    background: #00d021;
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
 }
+/*.food2 {*/
+/*    background: #4438d0;*/
+/*}*/
+/*.food3 {*/
+/*    background: #d05718;*/
+/*}*/
+/*.food4 {*/
+/*    background: #d009be;*/
+/*}*/
 
 .snakeBody {
     background: #e5e5e5;
