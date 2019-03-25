@@ -136,22 +136,22 @@ let renderer = {
 };
 
 let status = {
-    condition: null,
+    state: null,
 
     setPlaying() {
-        this.condition = 'playing';
+        this.state = 'playing';
     },
-    setStopped() {
-        this.condition = 'stopped';
+    setPaused() {
+        this.state = 'paused';
     },
     setFinished() {
-        this.condition = 'finished';
+        this.state = 'finished';
     },
     isPlaying() {
-        return this.condition === 'playing';
+        return this.state === 'playing';
     },
-    isStopped() {
-        return this.condition === 'stopped';
+    isPaused() {
+        return this.state === 'paused';
     },
 
 };
@@ -159,7 +159,7 @@ let status = {
 let settings = {
     rowsCount: 21,
     colsCount: 21,
-    speed: 2,
+    speed: 3,
     winScore: 10, //какой длины должна быть змейка для победы
     foodVariants: [
         {score: 1, color: 'green', lifetime: 5000},
@@ -179,7 +179,7 @@ let settings = {
             return false;
         }
 
-        if (this.speed < 1 || this.speed > 10) {
+        if (this.speed < 0.5 || this.speed > 10) {
             console.error('Неверные настройки, значение speed должно быть в диапазоне [1, 10].');
             return false;
         }
@@ -216,6 +216,7 @@ let game = {
     food,
     snake,
     scoreManager,
+    speed: 1,
     tickInterval: null,
     foodRegenerateTimeout: null,
 
@@ -241,7 +242,7 @@ let game = {
 
     playClickHandler() {
         if (this.status.isPlaying()) {
-            this.stop();
+            this.pause();
         } else {
             this.play();
         }
@@ -295,14 +296,21 @@ let game = {
         this.renderer.render(this.snake.body, this.food);
         this.scoreManager.reset();
         this.renderer.renderScore(this.scoreManager);
+        this.speed = this.settings.speed;
+    },
+
+    incrementSpeed() {
+        this.speed += 0.3;
+        clearInterval(this.tickInterval);
+        this.tickInterval = setInterval(() => this.tickHandler(), 1000 / this.speed);
     },
 
     play() {
         this.status.setPlaying();
 
-        this.tickInterval = setInterval(() => this.tickHandler(), 1000 / this.settings.speed);
+        this.tickInterval = setInterval(() => this.tickHandler(), 1000 / this.speed);
 
-        this.changePlayButton('Стоп');
+        this.changePlayButton('Пауза');
     },
 
     tickHandler() {
@@ -323,9 +331,8 @@ let game = {
         return this.scoreManager.getTotal() > this.settings.winScore;
     },
 
-    stop() {
-
-        this.status.setStopped();
+    pause() {
+        this.status.setPaused();
         clearInterval(this.tickInterval);
         clearTimeout(this.foodRegenerateTimeout);
         this.changePlayButton('Старт');
@@ -334,6 +341,7 @@ let game = {
     finish() {
         this.status.setFinished();
         clearInterval(this.tickInterval);
+        clearTimeout(this.foodRegenerateTimeout);
         this.changePlayButton('Игра закончена', true);
     },
 
@@ -351,7 +359,7 @@ let game = {
             let rndPoint = {
                 x: Math.floor(Math.random() * this.settings.colsCount),
                 y: Math.floor(Math.random() * this.settings.rowsCount)
-            }
+            };
 
             let excludeContainsRndPoint = exclude.some(function (exPoint) {
                 return rndPoint.x === exPoint.x && rndPoint.y === exPoint.y;
@@ -384,10 +392,11 @@ let game = {
         this.scoreManager.increment(this.food.score);
         clearTimeout(this.foodRegenerateTimeout);
         this.foodRegenerate();
+        this.incrementSpeed();
         this.renderer.renderScore(this.scoreManager);
         if (this.isGameWon()) {
             this.finish();
-        };
+        }
     },
 
     foodRegenerate(){
@@ -399,7 +408,7 @@ let game = {
 
 window.onload = function () {
     game.init({
-        speed: 5,
-        winScore: 10,
+        speed: 3,
+        winScore: 50,
     });
 };
