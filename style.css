@@ -4,7 +4,7 @@
     background: gray;
 }
 
-.menuButton, #counter {
+.menuButton, #counter, #timer {
     width: 150px;
     padding: 15px;
     margin: 10px;
@@ -13,11 +13,15 @@
     text-align: center;
     cursor: pointer;
 }
-#counter {
-    margin: 20px auto;
+#counter, #timer {
+    margin-left: 23.3%;
     background-color: #44825d;
     height: 20px;
     cursor: auto;
+    float: left;
+}
+#timer {
+    margin-left: 10px;
 }
 #counter p {
     background-color: inherit;

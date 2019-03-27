@@ -119,7 +119,6 @@ let renderer = {
         }
     },
 
-
     render(snakePointArray, food) {
         for (let key of Object.getOwnPropertyNames(this.cells)) {
             this.cells[key].className = 'cell';
@@ -131,9 +130,19 @@ let renderer = {
         });
 
         this.cells[`x${food.x}_y${food.y}`].insertAdjacentHTML("afterbegin", `<div class='food' style='background-color: ${food.color}'></div>`);
-    }
-
+    },
 };
+
+// let timer = {
+//     time: 0,
+//
+//     renderer() {
+//         let timer = document.getElementById('timer');
+//         let sec = 0;
+//         this.time = setInterval
+//     },
+//
+// };
 
 let status = {
     state: null,
@@ -311,6 +320,21 @@ let game = {
         this.tickInterval = setInterval(() => this.tickHandler(), 1000 / this.speed);
 
         this.changePlayButton('Пауза');
+
+        this.setTimer();
+    },
+
+    setTimer() {
+        let timer = document.getElementById('timer');
+        let sec = 0;
+        let min = 0;
+        this.timer = setInterval(function () {
+            sec++;
+            if (sec > 59) {
+                min++;
+            }
+            timer.innerHTML=`<p>${min}:${sec}</p>`;
+        }, 1000);
     },
 
     tickHandler() {
@@ -412,3 +436,4 @@ window.onload = function () {
         winScore: 50,
     });
 };
+
