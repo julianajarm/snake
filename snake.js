@@ -101,9 +101,9 @@ let renderer = {
         counterPlace.innerHTML = `<p>Счёт: ${scoreManager.getTotal()} </p>`;//интерполяция строки
     },
 
-    renderTimer() {
+    renderTimer(time) {
         let timerPlace = document.getElementById('timer');
-        timerPlace.innerHTML = `<p>Время: 0</p>`
+        timerPlace.innerHTML = `<p>Время: ${time}</p>`
     },
 
     renderInitMap(rowsCount, colsCount) {
@@ -138,16 +138,49 @@ let renderer = {
     },
 };
 
-// let timer = {
-//     time: 0,
-//
-//     renderer() {
-//         let timer = document.getElementById('timer');
-//         let sec = 0;
-//         this.time = setInterval
-//     },
-//
-// };
+let timer = {
+    renderer: null,
+    sec: 0,
+    interval: null,
+
+    init(renderer) {
+        this.renderer = renderer;
+        this.sec = 0;
+        this.render();
+    },
+
+    launch(){
+        this.interval = setInterval(() => this.tick(), 1000);
+    },
+
+    tick(){
+        this.sec++;
+        this.render();
+    },
+
+    stop(){
+        clearInterval(this.interval);
+    },
+
+    render() {
+        this.renderer.renderTimer(this.toString());
+    },
+
+    toString() {
+        let sec = this.sec % 60;
+        let min = Math.trunc(this.sec / 60);
+
+        if (sec < 10) {
+            sec = `0${sec}`;
+        }
+        if (min < 10) {
+            min = `0${min}`
+        }
+
+        return `${min}:${sec}`;
+    },
+
+};
 
 let status = {
     state: null,
@@ -230,6 +263,7 @@ let game = {
     food,
     snake,
     scoreManager,
+    timer,
     speed: 1,
     tickInterval: null,
     foodRegenerateTimeout: null,
@@ -311,6 +345,7 @@ let game = {
         this.scoreManager.reset();
         this.renderer.renderScore(this.scoreManager);
         this.speed = this.settings.speed;
+        this.timer.init(this.renderer);
     },
 
     incrementSpeed() {
@@ -321,26 +356,9 @@ let game = {
 
     play() {
         this.status.setPlaying();
-
         this.tickInterval = setInterval(() => this.tickHandler(), 1000 / this.speed);
-
         this.changePlayButton('Пауза');
-
-        this.setTimer();
-    },
-
-    setTimer() {
-        let timer = document.getElementById('timer');
-        let sec = 0;
-        let min = 0;
-        this.timer = setInterval(function () {
-            sec++;
-            if (sec % 60 === 0) {
-                min++;
-                sec = 0;
-            }
-            timer.innerHTML = `<p>Время: ${min}:${sec}</p>`;
-        }, 1000);
+        this.timer.launch();
     },
 
     tickHandler() {
@@ -365,6 +383,7 @@ let game = {
         this.status.setPaused();
         clearInterval(this.tickInterval);
         clearTimeout(this.foodRegenerateTimeout);
+        this.timer.stop();
         this.changePlayButton('Старт');
     },
 
@@ -372,7 +391,7 @@ let game = {
         this.status.setFinished();
         clearInterval(this.tickInterval);
         clearTimeout(this.foodRegenerateTimeout);
-        clearInterval(this.timer);
+        this.timer.stop();
         this.changePlayButton('Игра закончена', true);
     },
 
@@ -425,7 +444,6 @@ let game = {
         this.foodRegenerate();
         this.incrementSpeed();
         this.renderer.renderScore(this.scoreManager);
-        this.renderer.renderTimer();
         if (this.isGameWon()) {
             this.finish();
         }

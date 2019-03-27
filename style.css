@@ -13,16 +13,16 @@
     text-align: center;
     cursor: pointer;
 }
+#centerizer {
+    display: flex;
+    justify-content: center;
+}
 #counter, #timer {
-    margin-left: 23.3%;
     background-color: #44825d;
     height: 20px;
     cursor: auto;
-    float: left;
 }
-#timer {
-    margin-left: 10px;
-}
+
 #counter p, #timer p {
     background-color: inherit;
 }
