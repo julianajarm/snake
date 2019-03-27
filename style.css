@@ -23,7 +23,7 @@
 #timer {
     margin-left: 10px;
 }
-#counter p {
+#counter p, #timer p {
     background-color: inherit;
 }
 

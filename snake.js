@@ -101,6 +101,11 @@ let renderer = {
         counterPlace.innerHTML = `<p>Счёт: ${scoreManager.getTotal()} </p>`;//интерполяция строки
     },
 
+    renderTimer() {
+        let timerPlace = document.getElementById('timer');
+        timerPlace.innerHTML = `<p>Время: 0</p>`
+    },
+
     renderInitMap(rowsCount, colsCount) {
         let table = document.getElementById('game');
         table.innerHTML = '';
@@ -330,10 +335,11 @@ let game = {
         let min = 0;
         this.timer = setInterval(function () {
             sec++;
-            if (sec > 59) {
+            if (sec % 60 === 0) {
                 min++;
+                sec = 0;
             }
-            timer.innerHTML=`<p>${min}:${sec}</p>`;
+            timer.innerHTML = `<p>Время: ${min}:${sec}</p>`;
         }, 1000);
     },
 
@@ -366,6 +372,7 @@ let game = {
         this.status.setFinished();
         clearInterval(this.tickInterval);
         clearTimeout(this.foodRegenerateTimeout);
+        clearInterval(this.timer);
         this.changePlayButton('Игра закончена', true);
     },
 
@@ -418,6 +425,7 @@ let game = {
         this.foodRegenerate();
         this.incrementSpeed();
         this.renderer.renderScore(this.scoreManager);
+        this.renderer.renderTimer();
         if (this.isGameWon()) {
             this.finish();
         }
