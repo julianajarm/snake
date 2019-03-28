@@ -13,6 +13,14 @@
     text-align: center;
     cursor: pointer;
 }
+#scoreBoard {
+    float:left;
+    margin-left: 40px;
+    position: fixed;
+    width: 25%;
+    height: 400px;
+    background-color: #638265;
+}
 #centerizer {
     display: flex;
     justify-content: center;
