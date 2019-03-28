@@ -1,6 +1,8 @@
 let settings = {
     rowsCount: 21,
     colsCount: 21,
+    scoreRows: 5,
+    scoreCols: 3,
     speed: 3,
     winScore: 10, //какой длины должна быть змейка для победы
     foodVariants: [

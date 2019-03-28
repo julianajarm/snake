@@ -29,6 +29,25 @@ let renderer = {
         }
     },
 
+    renderScoreBoard (scoreRows, scoreCols) {
+        let table = document.getElementById('scoreBoard');
+        table.innerHTML = '';
+
+        for (let row = 0; row < settings.scoreRows; row++) {
+            let tr = document.createElement('tr');
+            tr.classList.add('scoreRows');
+            table.appendChild(tr);
+
+            for (let col = 0; col < settings.scoreCols; col++) {
+                let td = document.createElement('td');
+                td.classList.add('scoreCols');
+                tr.appendChild(td);
+            }
+        }
+
+
+    },
+
     render(snakePointArray, food) {
         for (let key of Object.getOwnPropertyNames(this.cells)) {
             this.cells[key].className = 'cell';

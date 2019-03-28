@@ -11,16 +11,13 @@ let game = {
     foodRegenerateTimeout: null,
 
     init(userSettings = {}) {
-        Object.assign(settings, userSettings); //если в userSettings ничего не будет, он будет пустой, то ничего не произойдет, но если передать скорость 5, она обновится и в массиве сеттингс
-
+        Object.assign(settings, userSettings);
         if (!settings.validate()) {
             return;
         }
-
         renderer.renderInitMap(settings.rowsCount, settings.colsCount);
-
+        renderer.renderScoreBoard(3, 6);
         this.setEventHandlers();
-
         this.reset();
     },
 

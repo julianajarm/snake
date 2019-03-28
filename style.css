@@ -15,10 +15,16 @@
 }
 #scoreBoard {
     float:left;
-    margin-left: 40px;
+    margin-left: 10px;
     position: fixed;
     width: 25%;
-    height: 400px;
+    border-collapse: collapse;
+}
+#scoreBoard td {
+    width: 150px;
+    height: 20px;
+    border: 1px solid #FFFFFF;
+    color: #FFFFFF;
     background-color: #638265;
 }
 #centerizer {
@@ -59,15 +65,6 @@ td.cell {
     height: 100%;
     border-radius: 15px;
 }
-/*.food2 {*/
-/*    background: #4438d0;*/
-/*}*/
-/*.food3 {*/
-/*    background: #d05718;*/
-/*}*/
-/*.food4 {*/
-/*    background: #d009be;*/
-/*}*/
 
 .snakeBody {
     background: #e5e5e5;
