@@ -1,8 +1,6 @@
 let settings = {
     rowsCount: 21,
     colsCount: 21,
-    scoreRows: 5,
-    scoreCols: 3,
     speed: 3,
     winScore: 10, //какой длины должна быть змейка для победы
     foodVariants: [
@@ -10,7 +8,7 @@ let settings = {
         {score: 2, color: 'blue', lifetime: 4000},
         {score: 3, color: 'orange', lifetime: 3000},
     ],
-
+    topLimit: 5,
 
     validate() {
         if (this.rowsCount < 10 || this.rowsCount > 30) {

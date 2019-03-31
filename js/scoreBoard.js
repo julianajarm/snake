@@ -1,17 +1,30 @@
 let scoreBoard = {
-    username: undefined,
-    time: null,
-    score: null,
+    limit: null,
+    // {name: '', time: null},
+    players: [],
 
-    getUserName() {
-        this.username = prompt('Enter username:');
+    init(limit){
+        this.limit = limit;
+        let players = this.load();
+        this.players = players.slice(0, limit);
     },
 
-    setScore() {
-
+    load(){
+        return [
+            {name: 'Mark', time: 50},
+            {name: 'Max', time: 55},
+            {name: 'Mary', time: 59},
+            {name: 'Margo', time: 60},
+            {name: 'March', time: 60},
+        ];
     },
 
-    setTime() {
+    addPlayer(name, time) {
+        this.players.push({name: name, time: time});
+    },
 
-    }
+    getPlayers() {
+        // let player = prompt('Enter username:');
+        return this.players;
+    },
 };

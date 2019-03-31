@@ -8,8 +8,8 @@ js snake game
     + [x]  min:sec (00:01). 
     + [x]  rendered by renderer. 
 - [ ] scoreBoard 
-    + [ ]  rendered left to the board, 
+    + [x]  rendered left to the board, 
     + [ ]  contains length (5 places - config, can be changed in code). 
-    + [ ]  prompt for username.
-    + [ ]  username - time - score
+    + [x]  prompt for username.
+    + [x]  username - time.
        

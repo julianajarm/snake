@@ -6,9 +6,22 @@ let renderer = {
         counterPlace.innerHTML = `<p>Счёт: ${scoreManager.getTotal()} </p>`;//интерполяция строки
     },
 
-    renderTimer(time) {
-        let timerPlace = document.getElementById('timer');
-        timerPlace.innerHTML = `<p>Время: ${time}</p>`
+    renderTimer(sec) {
+        document.getElementById('timer').innerHTML = `<p>Время: ${this.timeString(sec)}</p>`;
+    },
+
+    timeString(sec) {
+        let min = Math.trunc(sec / 60);
+        sec = sec % 60;
+
+        if (sec < 10) {
+            sec = `0${sec}`;
+        }
+        if (min < 10) {
+            min = `0${min}`
+        }
+
+        return `${min}:${sec}`;
     },
 
     renderInitMap(rowsCount, colsCount) {
@@ -29,23 +42,14 @@ let renderer = {
         }
     },
 
-    renderScoreBoard (scoreRows, scoreCols) {
-        let table = document.getElementById('scoreBoard');
-        table.innerHTML = '';
+    renderScoreBoard(scoreBoard) {
+        let table = '<tr><th>#</th><th>Игрок</th><th>Время</th></tr>';
+        let that = this;
+        scoreBoard.getPlayers().forEach(function (player, i) {
+            table += `<tr><td>${i+1}</td><td>${player.name}</td><td>${that.timeString(player.time)}</td></tr>`;
+        });
 
-        for (let row = 0; row < settings.scoreRows; row++) {
-            let tr = document.createElement('tr');
-            tr.classList.add('scoreRows');
-            table.appendChild(tr);
-
-            for (let col = 0; col < settings.scoreCols; col++) {
-                let td = document.createElement('td');
-                td.classList.add('scoreCols');
-                tr.appendChild(td);
-            }
-        }
-
-
+        document.getElementById('scoreBoard').innerHTML = `<table>${table}</table>`;
     },
 
     render(snakePointArray, food) {

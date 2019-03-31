@@ -1,22 +1,24 @@
 let game = {
-    snake: undefined,
-    settings: undefined,
-    status: undefined,
-    scoreManager: undefined,
-    timer: undefined,
-    renderer: undefined,
-    food: undefined,
+    snake,
+    settings,
+    status,
+    scoreManager,
+    timer,
+    renderer,
+    food,
+    scoreBoard,
     speed: 1,
     tickInterval: null,
     foodRegenerateTimeout: null,
 
     init(userSettings = {}) {
-        Object.assign(settings, userSettings);
-        if (!settings.validate()) {
+        Object.assign(this.settings, userSettings);
+        if (!this.settings.validate()) {
             return;
         }
-        renderer.renderInitMap(settings.rowsCount, settings.colsCount);
-        renderer.renderScoreBoard(3, 6);
+        this.scoreBoard.init(this.settings.topLimit);
+        this.renderer.renderInitMap(this.settings.rowsCount, this.settings.colsCount);
+        this.renderer.renderScoreBoard(this.scoreBoard);
         this.setEventHandlers();
         this.reset();
     },
@@ -28,7 +30,7 @@ let game = {
     },
 
     playClickHandler() {
-        if (status.isPlaying()) {
+        if (this.status.isPlaying()) {
             this.pause();
         } else {
             this.play();
@@ -40,22 +42,22 @@ let game = {
     },
 
     keyDownHandler(event) {
-        if (!status.isPlaying()) {
+        if (!this.status.isPlaying()) {
             return;
         }
 
         let direction = this.getDirectionByCode(event.code);
         if (this.canSetDirection(direction)) {
-            snake.setDirection(direction);
+            this.snake.setDirection(direction);
         }
 
     },
 
     canSetDirection(direction) {
-        return direction === 'up' && snake.lastStepDirection !== 'down' ||
-            direction === 'right' && snake.lastStepDirection !== 'left' ||
-            direction === 'down' && snake.lastStepDirection !== 'up' ||
-            direction === 'left' && snake.lastStepDirection !== 'right';
+        return direction === 'up' && this.snake.lastStepDirection !== 'down' ||
+            direction === 'right' && this.snake.lastStepDirection !== 'left' ||
+            direction === 'down' && this.snake.lastStepDirection !== 'up' ||
+            direction === 'left' && this.snake.lastStepDirection !== 'right';
     },
 
     getDirectionByCode(code) {
@@ -78,13 +80,13 @@ let game = {
     },
 
     reset() {
-        snake.init(this.getStartSnakePoint(), 'up');
-        food.generate(this.getRandomCoordinates(), settings.foodVariants);
-        renderer.render(snake.body, food);
-        scoreManager.reset();
-        renderer.renderScore(scoreManager);
-        this.speed = settings.speed;
-        timer.init(renderer);
+        this.snake.init(this.getStartSnakePoint(), 'up');
+        this.food.generate(this.getRandomCoordinates(), this.settings.foodVariants);
+        this.renderer.render(this.snake.body, this.food);
+        this.scoreManager.reset();
+        this.renderer.renderScore(this.scoreManager);
+        this.speed = this.settings.speed;
+        this.timer.init(this.renderer);
     },
 
     incrementSpeed() {
@@ -94,10 +96,10 @@ let game = {
     },
 
     play() {
-        status.setPlaying();
+        this.status.setPlaying();
         this.tickInterval = setInterval(() => this.tickHandler(), 1000 / this.speed);
         this.changePlayButton('Пауза');
-        timer.launch();
+        this.timer.launch();
     },
 
     tickHandler() {
@@ -106,48 +108,59 @@ let game = {
             return;
         }
 
-        if (food.isThere(snake.getNextStepHeadPoint())) {
+        if (this.food.isThere(this.snake.getNextStepHeadPoint())) {
             this.snakeEats();
         }
 
-        snake.makeStep();
-        renderer.render(snake.body, food);
+        this.snake.makeStep();
+        this.renderer.render(this.snake.body, this.food);
+
+        if (this.isGameWon()) {
+            this.finish();
+        }
     },
 
     isGameWon() {
-        return scoreManager.getTotal() > settings.winScore;
+        return this.scoreManager.getTotal() >= this.settings.winScore;
     },
 
     pause() {
-        status.setPaused();
+        this.status.setPaused();
         clearInterval(this.tickInterval);
         clearTimeout(this.foodRegenerateTimeout);
-        timer.stop();
+        this.timer.stop();
         this.changePlayButton('Старт');
     },
 
     finish() {
-        status.setFinished();
+        this.status.setFinished();
         clearInterval(this.tickInterval);
         clearTimeout(this.foodRegenerateTimeout);
-        timer.stop();
+        this.timer.stop();
         this.changePlayButton('Игра закончена', true);
+        setTimeout(() => this.saveResult(), 100);
+    },
+
+    saveResult() {
+        let username = prompt("Введите свое имя:");
+        this.scoreBoard.addPlayer(username, this.timer.sec);
+        this.renderer.renderScoreBoard(this.scoreBoard);
     },
 
     getStartSnakePoint() {
         return {
-            x: Math.floor(settings.colsCount / 2),
-            y: Math.floor(settings.rowsCount / 2)
+            x: Math.floor(this.settings.colsCount / 2),
+            y: Math.floor(this.settings.rowsCount / 2)
         }
     },
 
     getRandomCoordinates() {
-        let exclude = [food.getCoordinates(), ...snake.body];
+        let exclude = [this.food.getCoordinates(), ...this.snake.body];
 
         while (true) {
             let rndPoint = {
-                x: Math.floor(Math.random() * settings.colsCount),
-                y: Math.floor(Math.random() * settings.rowsCount)
+                x: Math.floor(Math.random() * this.settings.colsCount),
+                y: Math.floor(Math.random() * this.settings.rowsCount)
             };
 
             let excludeContainsRndPoint = exclude.some(function (exPoint) {
@@ -167,37 +180,27 @@ let game = {
     },
 
     canSnakeMakeStep() {
-        let nextHeadPoint = snake.getNextStepHeadPoint();
+        let nextHeadPoint = this.snake.getNextStepHeadPoint();
 
-        return !snake.isBodyPoint(nextHeadPoint) &&
-            nextHeadPoint.x < settings.colsCount &&
-            nextHeadPoint.y < settings.rowsCount &&
+        return !this.snake.isBodyPoint(nextHeadPoint) &&
+            nextHeadPoint.x < this.settings.colsCount &&
+            nextHeadPoint.y < this.settings.rowsCount &&
             nextHeadPoint.x >= 0 &&
             nextHeadPoint.y >= 0;
     },
 
     snakeEats: function () {
-        snake.incrementBody();
-        scoreManager.increment(food.score);
+        this.snake.incrementBody();
+        this.scoreManager.increment(this.food.score);
         clearTimeout(this.foodRegenerateTimeout);
         this.foodRegenerate();
         this.incrementSpeed();
-        renderer.renderScore(scoreManager);
-        if (this.isGameWon()) {
-            this.finish();
-        }
+        this.renderer.renderScore(this.scoreManager);
     },
 
     foodRegenerate(){
-        food.generate(this.getRandomCoordinates(), settings.foodVariants);
-        renderer.render(snake.body, food);
-        this.foodRegenerateTimeout = setTimeout( () => this.foodRegenerate(), food.lifetime);
+        this.food.generate(this.getRandomCoordinates(), this.settings.foodVariants);
+        this.renderer.render(this.snake.body, this.food);
+        this.foodRegenerateTimeout = setTimeout( () => this.foodRegenerate(), this.food.lifetime);
     },
-};
-
-window.onload = function () {
-    game.init({
-        speed: 3,
-        winScore: 50,
-    });
 };

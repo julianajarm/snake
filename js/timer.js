@@ -4,7 +4,7 @@ let timer = {
     interval: null,
 
     init(renderer) {
-        renderer = this.renderer;
+        this.renderer = renderer;
         this.sec = 0;
         this.render();
     },
@@ -23,21 +23,6 @@ let timer = {
     },
 
     render() {
-        renderer.renderTimer(this.toString());
+        this.renderer.renderTimer(this.sec);
     },
-
-    toString() {
-        let sec = this.sec % 60;
-        let min = Math.trunc(this.sec / 60);
-
-        if (sec < 10) {
-            sec = `0${sec}`;
-        }
-        if (min < 10) {
-            min = `0${min}`
-        }
-
-        return `${min}:${sec}`;
-    },
-
 };
