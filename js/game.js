@@ -104,7 +104,7 @@ let game = {
 
     tickHandler() {
         if (!this.canSnakeMakeStep()) {
-            this.finish();
+            this.finish(false);
             return;
         }
 
@@ -116,7 +116,7 @@ let game = {
         this.renderer.render(this.snake.body, this.food);
 
         if (this.isGameWon()) {
-            this.finish();
+            this.finish(true);
         }
     },
 
@@ -132,13 +132,15 @@ let game = {
         this.changePlayButton('Старт');
     },
 
-    finish() {
+    finish(isWon) {
         this.status.setFinished();
         clearInterval(this.tickInterval);
         clearTimeout(this.foodRegenerateTimeout);
         this.timer.stop();
         this.changePlayButton('Игра закончена', true);
-        setTimeout(() => this.saveResult(), 100);
+        if (isWon) {
+            setTimeout(() => this.saveResult(), 100);
+        }
     },
 
     saveResult() {

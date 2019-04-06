@@ -2,13 +2,13 @@ let settings = {
     rowsCount: 21,
     colsCount: 21,
     speed: 3,
-    winScore: 10, //какой длины должна быть змейка для победы
+    winScore: 50, //какой длины должна быть змейка для победы
     foodVariants: [
         {score: 1, color: 'green', lifetime: 5000},
         {score: 2, color: 'blue', lifetime: 4000},
         {score: 3, color: 'orange', lifetime: 3000},
     ],
-    topLimit: 5,
+    topLimit: 10,
 
     validate() {
         if (this.rowsCount < 10 || this.rowsCount > 30) {
@@ -26,7 +26,7 @@ let settings = {
             return false;
         }
 
-        if (this.winScore < 5 || this.winScore > 50) {
+        if (this.winScore < 5 || this.winScore > 60) {
             console.error('Неверные настройки, значение winScore должно быть в диапазоне [5, 50].');
             return false;
         }

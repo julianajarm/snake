@@ -9,28 +9,35 @@ let scoreBoard = {
     },
 
     load(){
-        return [
-            {name: 'Mark', time: 50},
-            {name: 'Max', time: 55},
-            {name: 'Mary', time: 59},
-            {name: 'Margo', time: 60},
-            {name: 'March', time: 60},
-        ];
+        return JSON.parse(localStorage.getItem('scoreBoard') || "[]");
+    },
+
+    save() {
+        localStorage.setItem('scoreBoard', JSON.stringify(this.results));
     },
 
     addResult(name, time) {
-
+        let position = null;
         for ( let i = 0; i < this.results.length; i++) {
             if ( time < this.results[i].time ) {
-                this.results.splice(i, 0, {name: name, time: time});
-                this.results = this.results.slice(0, this.limit);
-                return;
+                position = i;
+                break;
             }
         }
+        if (position === null) {
+            position = this.results.length;
+        }
+        this.results.splice(position, 0, {name: name, time: time});
+        this.results = this.results.slice(0, this.limit);
+        this.save();
+    },
+
+    clear() {
+        this.results = [];
+        this.save();
     },
 
     getPlayers() {
-        // let player = prompt('Enter username:');
         return this.results;
     },
 };

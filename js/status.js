@@ -13,8 +13,4 @@ let status = {
     isPlaying() {
         return this.state === 'playing';
     },
-    isPaused() {
-        return this.state === 'paused';
-    },
-
 };
