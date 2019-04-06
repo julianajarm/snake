@@ -10,7 +10,13 @@ let status = {
     setFinished() {
         this.state = 'finished';
     },
+    isFinished(){
+        return this.state === 'finished';
+    },
     isPlaying() {
         return this.state === 'playing';
+    },
+    reset() {
+        this.state = null;
     },
 };

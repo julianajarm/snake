@@ -30,7 +30,9 @@ let game = {
     },
 
     playClickHandler() {
-        if (this.status.isPlaying()) {
+        if (this.status.isFinished()) {
+            return;
+        } else if (this.status.isPlaying()) {
             this.pause();
         } else {
             this.play();
@@ -39,6 +41,7 @@ let game = {
 
     newGameClickHandler() {
         this.reset();
+        this.changePlayButton('Старт');
     },
 
     keyDownHandler(event) {
@@ -87,6 +90,7 @@ let game = {
         this.renderer.renderScore(this.scoreManager);
         this.speed = this.settings.speed;
         this.timer.init(this.renderer);
+        this.status.reset();
     },
 
     incrementSpeed() {
