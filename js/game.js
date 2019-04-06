@@ -143,7 +143,7 @@ let game = {
 
     saveResult() {
         let username = prompt("Введите свое имя:");
-        this.scoreBoard.addPlayer(username, this.timer.sec);
+        this.scoreBoard.addResult(username, this.timer.sec);
         this.renderer.renderScoreBoard(this.scoreBoard);
     },
 

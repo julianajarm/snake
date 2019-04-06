@@ -1,12 +1,11 @@
 let scoreBoard = {
     limit: null,
     // {name: '', time: null},
-    players: [],
+    results: [],
 
     init(limit){
         this.limit = limit;
-        let players = this.load();
-        this.players = players.slice(0, limit);
+        this.results = this.load().slice(0, this.limit);
     },
 
     load(){
@@ -19,12 +18,19 @@ let scoreBoard = {
         ];
     },
 
-    addPlayer(name, time) {
-        this.players.push({name: name, time: time});
+    addResult(name, time) {
+
+        for ( let i = 0; i < this.results.length; i++) {
+            if ( time < this.results[i].time ) {
+                this.results.splice(i, 0, {name: name, time: time});
+                this.results = this.results.slice(0, this.limit);
+                return;
+            }
+        }
     },
 
     getPlayers() {
         // let player = prompt('Enter username:');
-        return this.players;
+        return this.results;
     },
 };
